@@ -22,7 +22,7 @@
       </div>
       <div class="flex items-center gap-4">
         <div class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-lg text-right">
-          <span id="general-progress-text" class="text-xs text-amber-400 font-semibold block">Progreso General</span>
+          <span class="text-xs text-amber-400 font-semibold block">Progreso General</span>
           <span id="general-progress-pct" class="text-lg font-bold">0% Completado</span>
         </div>
       </div>
@@ -36,6 +36,9 @@
         <button onclick="switchTab('quizzes')" id="tab-quizzes" class="py-3 px-2 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white transition-colors">
           Exámenes Cortos
         </button>
+        <button onclick="switchTab('grades')" id="tab-grades" class="py-3 px-2 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white transition-colors">
+          Mis Calificaciones
+        </button>
       </div>
     </div>
   </header>
@@ -48,7 +51,7 @@
       <div class="flex justify-between items-center">
         <div>
           <h2 class="text-2xl font-bold text-slate-900">Temario Cronológico Oficial</h2>
-          <p class="text-sm text-slate-600">Selecciona un módulo para estudiar los conceptos clave y realizar su prueba corta.</p>
+          <p class="text-sm text-slate-600">Completa cada módulo y obtén al menos 70 puntos en su examen para desbloquear el siguiente.</p>
         </div>
       </div>
 
@@ -77,9 +80,9 @@
 
         <!-- Botón para ir al Examen -->
         <div class="mt-10 pt-6 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p class="text-sm text-slate-500">¿Completaste la lectura y los ejemplos? Pon a prueba tus conocimientos.</p>
+          <p class="text-sm text-slate-500">Se requiere nota mínima de 70% para aprobar y avanzar al siguiente módulo.</p>
           <button id="btn-open-quiz" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl shadow-sm transition-all transform hover:-translate-y-0.5">
-            Realizar Examen Corto del Módulo
+            Realizar Examen Corto (10 Preguntas)
           </button>
         </div>
       </div>
@@ -89,10 +92,57 @@
     <div id="view-quizzes" class="hidden space-y-6">
       <div>
         <h2 class="text-2xl font-bold text-slate-900">Banco de Exámenes Cortos</h2>
-        <p class="text-sm text-slate-600">Repasa tus calificaciones y repite las evaluaciones cuando lo necesites.</p>
+        <p class="text-sm text-slate-600">Repasa tus calificaciones y repite las evaluaciones para mejorar tu puntaje.</p>
       </div>
       <div id="quizzes-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Generado dinámicamente -->
+      </div>
+    </div>
+
+    <!-- VISTA 4: APARTADO DE CALIFICACIONES Y ESTADÍSTICAS -->
+    <div id="view-grades" class="hidden space-y-6">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Apartado de Calificaciones</h2>
+        <p class="text-sm text-slate-600">Resumen detallado de tu rendimiento académico en cada evaluación corta.</p>
+      </div>
+
+      <!-- Tarjetas de Resumen Estadístico -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Promedio General</span>
+          <p id="stats-avg-score" class="text-3xl font-extrabold text-slate-900 mt-1">0%</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Exámenes Aprobados</span>
+          <p id="stats-passed-count" class="text-3xl font-extrabold text-emerald-600 mt-1">0 / 7</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Módulos Desbloqueados</span>
+          <p id="stats-unlocked-count" class="text-3xl font-extrabold text-blue-600 mt-1">1 / 7</p>
+        </div>
+      </div>
+
+      <!-- Tabla detallada de notas -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 bg-slate-50 border-b border-slate-200">
+          <h3 class="font-bold text-slate-800 text-base">Historial de Evaluaciones</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase bg-slate-50/50">
+                <th class="py-3 px-6">Módulo</th>
+                <th class="py-3 px-6">Evaluación</th>
+                <th class="py-3 px-6">Calificación</th>
+                <th class="py-3 px-6">Estado</th>
+                <th class="py-3 px-6 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="grades-table-body" class="divide-y divide-slate-100 text-sm text-slate-700">
+              <!-- Inyectado por JS -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -100,7 +150,7 @@
 
   <!-- MODAL DE EXAMEN CORTO -->
   <div id="quiz-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 md:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 md:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center pb-4 border-b border-slate-100">
         <h3 id="modal-quiz-title" class="font-bold text-xl text-slate-900">Examen Corto</h3>
         <button onclick="closeQuizModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">×</button>
@@ -139,34 +189,22 @@
           <div class="space-y-6">
             <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
               <h3 class="font-bold text-slate-900 text-lg mb-3">1. Ley de Signos</h3>
-              <p class="text-sm mb-2"><strong>Suma y Resta:</strong> Signos iguales se suman y conservan su signo (+5 + 3 = +8; -7 - 4 = -11). Signos diferentes se restan (mayor menos menor) y conservan el signo del número con mayor valor absoluto (-9 + 4 = -5).</p>
+              <p class="text-sm mb-2"><strong>Suma y Resta:</strong> Signos iguales se suman y conservan su signo (+5 + 3 = +8; -7 - 4 = -11). Signos diferentes se restan y conservan el signo del número con mayor valor absoluto (-9 + 4 = -5).</p>
               <p class="text-sm"><strong>Multiplicación y División:</strong> (+)·(+) = +  |  (-)·(-) = +  |  (+)·(-) = -  |  (-)·(+) = -</p>
             </div>
 
             <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
               <h3 class="font-bold text-slate-900 text-lg mb-3">2. Operaciones con Decimales sin Calculadora</h3>
               <p class="text-sm mb-2"><strong>Multiplicación:</strong> Realiza la multiplicación ignorando los puntos decimales. Al resultado final se le recorre el punto a la izquierda tantas posiciones como la suma total de cifras decimales de ambos factores.</p>
-              <p class="text-sm"><strong>División:</strong> Si el divisor tiene decimales, se multiplica tanto el dividendo como el divisor por una potencia de 10 (10, 100, 1000) hasta convertir el divisor en entero antes de operar en la casilla.</p>
+              <p class="text-sm"><strong>División:</strong> Si el divisor tiene decimales, se multiplica tanto el dividendo como el divisor por una potencia de 10 hasta convertir el divisor en entero.</p>
             </div>
 
             <div class="bg-blue-50 p-5 rounded-xl border border-blue-200">
               <h4 class="font-bold text-blue-900 text-base mb-2">Ejemplo Resuelto 1: Operaciones combinadas con ley de signos</h4>
               <p class="text-sm text-blue-800 mb-3 font-mono bg-blue-100/60 p-2 rounded">Calcular: -8 + (-3)(4) - (-15 ÷ 3)</p>
               <div class="text-xs text-blue-900 space-y-1.5 leading-relaxed">
-                <p><strong>Paso 1:</strong> Resolver multiplicaciones y divisiones aplicando ley de signos:</p>
-                <p class="pl-4">• (-3) × (4) = -12  |  (-15) ÷ (3) = -5</p>
-                <p><strong>Paso 2:</strong> Sustituir en la expresión: -8 + (-12) - (-5)</p>
-                <p><strong>Paso 3:</strong> Suprimir signos de agrupación (un signo menos antes de un paréntesis cambia el signo interno): -8 - 12 + 5</p>
-                <p><strong>Paso 4:</strong> Operar de izquierda a derecha: -20 + 5 = <strong class="text-blue-950">-15</strong></p>
-              </div>
-            </div>
-
-            <div class="bg-blue-50 p-5 rounded-xl border border-blue-200">
-              <h4 class="font-bold text-blue-900 text-base mb-2">Ejemplo Resuelto 2: División de decimales</h4>
-              <p class="text-sm text-blue-800 mb-3 font-mono bg-blue-100/60 p-2 rounded">Calcular: 1.44 ÷ 0.12</p>
-              <div class="text-xs text-blue-900 space-y-1.5 leading-relaxed">
-                <p><strong>Paso 1:</strong> Multiplicar ambos números por 100 para eliminar los decimales del divisor: 1.44 × 100 = 144 y 0.12 × 100 = 12.</p>
-                <p><strong>Paso 2:</strong> Efectuar la división directa de enteros: 144 ÷ 12 = <strong class="text-blue-950">12</strong>.</p>
+                <p><strong>Paso 1:</strong> Multiplicaciones y divisiones: (-3) × (4) = -12 y (-15) ÷ (3) = -5.</p>
+                <p><strong>Paso 2:</strong> Sustituir: -8 + (-12) - (-5) = -8 - 12 + 5 = <strong class="text-blue-950">-15</strong></p>
               </div>
             </div>
           </div>
@@ -228,6 +266,7 @@
       }
     };
 
+    // BANCO DE 10 PREGUNTAS PARA EL MÓDULO 1
     const quizzesData = {
       1: {
         title: "Examen Corto 1: Aritmética y Operaciones con Decimales",
@@ -237,14 +276,14 @@
             question: "¿Cuál es el resultado de la expresión: -14 - 6 × (-3) + (-8) ÷ 2?",
             options: ["-8", "0", "4", "8"],
             correct: 1,
-            explanation: "Resolvemos multiplicaciones y divisiones primero: -6 × (-3) = +18 y (-8) ÷ 2 = -4. La expresión resulta: -14 + 18 - 4 = 0."
+            explanation: "Multiplicación y división: -6 × (-3) = +18 y (-8) ÷ 2 = -4. Resulta: -14 + 18 - 4 = 0."
           },
           {
             id: 2,
-            question: "Un frasco de medicamento contiene 0.75 litros de solución oral. Si se administran dosis diarias de 0.05 litros, ¿para cuántos días alcanza el frasco?",
+            question: "Un frasco de medicamento contiene 0.75 L. Si se administran dosis de 0.05 L al día, ¿para cuántos días alcanza?",
             options: ["10 días", "12 días", "15 días", "20 días"],
             correct: 2,
-            explanation: "Planteamos la división 0.75 ÷ 0.05. Multiplicamos dividendo y divisor por 100: 75 ÷ 5 = 15 días."
+            explanation: "Dividimos 0.75 ÷ 0.05 multiplicando ambos por 100: 75 ÷ 5 = 15 días."
           },
           {
             id: 3,
@@ -252,6 +291,55 @@
             options: ["0.4", "0.5", "0.6", "0.8"],
             correct: 2,
             explanation: "Multiplicamos 3.25 × 0.4 = 1.30. Luego restamos: 1.3 - 0.7 = 0.6."
+          },
+          {
+            id: 4,
+            question: "Al resolver (-5) + [(-2) × (-4)] - (12 ÷ (-3)), se obtiene:",
+            options: ["1", "3", "7", "11"],
+            correct: 2,
+            explanation: "Paréntesis: (-2)(-4) = 8 y (12 / -3) = -4. Operación: -5 + 8 - (-4) = 3 + 4 = 7."
+          },
+          {
+            id: 5,
+            question: "¿Cuál es el resultado de la operación con decimales: 4.8 × 2.5?",
+            options: ["10.0", "12.0", "12.5", "14.0"],
+            correct: 1,
+            explanation: "48 × 25 = 1200. Con 2 decimales en total, el resultado es 12.0."
+          },
+          {
+            id: 6,
+            question: "Al efectuar la división 3.6 ÷ 0.04, el resultado es:",
+            options: ["9", "90", "900", "0.9"],
+            correct: 1,
+            explanation: "Multiplicamos ambos por 100: 360 ÷ 4 = 90."
+          },
+          {
+            id: 7,
+            question: "Determine el valor de: -18 - (-6) + 4 × (-2)",
+            options: ["-20", "-16", "-8", "4"],
+            correct: 0,
+            explanation: "-18 + 6 - 8 = -12 - 8 = -20."
+          },
+          {
+            id: 8,
+            question: "Si a un tanque con 12.5 litros de agua se le extraen 3.75 litros y luego se le añaden 5.2 litros, ¿qué volumen contiene?",
+            options: ["13.95 L", "14.05 L", "11.05 L", "15.15 L"],
+            correct: 0,
+            explanation: "12.5 - 3.75 = 8.75. Luego 8.75 + 5.2 = 13.95 L."
+          },
+          {
+            id: 9,
+            question: "¿Cuál es el resultado de simplificar: -[ - ( - 7 ) ]?",
+            options: ["-7", "7", "0", "14"],
+            correct: 0,
+            explanation: "Eliminando paréntesis de adentro hacia afuera: -(-(-7)) = -(+7) = -7."
+          },
+          {
+            id: 10,
+            question: "Al multiplicar 0.003 por 0.02, el resultado correcto es:",
+            options: ["0.0006", "0.00006", "0.006", "0.06"],
+            correct: 1,
+            explanation: "3 × 2 = 6. Contamos 3 decimales (0.003) y 2 decimales (0.02) = 5 decimales en total -> 0.00006."
           }
         ]
       },
@@ -276,7 +364,7 @@
       const totalModules = Object.keys(modulesData).length;
       let completedCount = 0;
       for (let id in modulesData) {
-        if (userProgress[id] && userProgress[id].completed) completedCount++;
+        if (userProgress[id] && userProgress[id].passed) completedCount++;
       }
       const pct = Math.round((completedCount / totalModules) * 100);
       document.getElementById('general-progress-pct').innerText = `${pct}% Completado`;
@@ -287,9 +375,11 @@
       document.getElementById('view-dashboard').classList.add('hidden');
       document.getElementById('view-lesson').classList.add('hidden');
       document.getElementById('view-quizzes').classList.add('hidden');
+      document.getElementById('view-grades').classList.add('hidden');
 
       document.getElementById('tab-dashboard').className = "py-3 px-2 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white transition-colors";
       document.getElementById('tab-quizzes').className = "py-3 px-2 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white transition-colors";
+      document.getElementById('tab-grades').className = "py-3 px-2 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white transition-colors";
 
       if (tab === 'dashboard') {
         document.getElementById('view-dashboard').classList.remove('hidden');
@@ -299,54 +389,97 @@
         document.getElementById('view-quizzes').classList.remove('hidden');
         document.getElementById('tab-quizzes').className = "py-3 px-2 border-b-2 border-amber-500 font-medium text-sm text-white transition-colors";
         renderQuizzesHub();
+      } else if (tab === 'grades') {
+        document.getElementById('view-grades').classList.remove('hidden');
+        document.getElementById('tab-grades').className = "py-3 px-2 border-b-2 border-amber-500 font-medium text-sm text-white transition-colors";
+        renderGradesView();
       }
     }
 
-    // RENDERIZAR DASHBOARD DE MÓDULOS
+    // VERIFICAR SI UN MÓDULO ESTÁ DESBLOQUEADO
+    function isModuleUnlocked(id) {
+      if (id === 1 || id === "1") return true;
+      const prevId = parseInt(id) - 1;
+      const prevProg = userProgress[prevId];
+      return prevProg && prevProg.passed;
+    }
+
+    // RENDERIZAR DASHBOARD DE MÓDULOS CON BLOQUEO
     function renderDashboard() {
       const grid = document.getElementById('modules-grid');
       grid.innerHTML = '';
 
       for (let id in modulesData) {
         const mod = modulesData[id];
-        const prog = userProgress[id] || { completed: false, score: null };
+        const unlocked = isModuleUnlocked(id);
+        const prog = userProgress[id] || { passed: false, score: null };
         
         let statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200">Pendiente</span>`;
-        if (prog.completed) {
-          statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">Completado (${prog.score}%)</span>`;
+        if (prog.passed) {
+          statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">Aprobado (${prog.score}%)</span>`;
+        } else if (prog.score !== null && !prog.passed) {
+          statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-100 text-rose-800 border border-rose-200">No Aprobado (${prog.score}%)</span>`;
         }
 
         let topicsHtml = mod.topics.map(t => `<li class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>${t}</li>`).join('');
 
         const card = document.createElement('div');
-        card.className = "bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow";
-        card.innerHTML = `
-          <div>
-            <div class="${mod.colorClass} h-3 w-full"></div>
-            <div class="p-6 space-y-4">
-              <div class="flex justify-between items-start gap-2">
-                <h3 class="font-bold text-lg text-slate-900">${mod.title}</h3>
-                ${statusBadge}
-              </div>
-              <p class="text-sm text-slate-600">${mod.description}</p>
-              <div class="space-y-1">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Temas clave:</span>
-                <ul class="text-xs text-slate-600 space-y-1">${topicsHtml}</ul>
+        if (!unlocked) {
+          card.className = "bg-slate-50 rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between opacity-75";
+          card.innerHTML = `
+            <div>
+              <div class="bg-slate-400 h-3 w-full"></div>
+              <div class="p-6 space-y-4">
+                <div class="flex justify-between items-start gap-2">
+                  <h3 class="font-bold text-lg text-slate-500">${mod.title}</h3>
+                  <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-200 text-slate-600">Bloqueado</span>
+                </div>
+                <p class="text-sm text-slate-500">${mod.description}</p>
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-xs text-amber-800 font-medium">
+                  🔒 Aprueba el examen del Módulo anterior con nota mínima de 70% para desbloquear.
+                </div>
               </div>
             </div>
-          </div>
-          <div class="p-6 pt-0">
-            <button onclick="openLesson(${id})" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-xl text-sm transition-colors text-center block">
-              ${prog.completed ? 'Repasar Módulo' : 'Entrar al Módulo'}
-            </button>
-          </div>
-        `;
+            <div class="p-6 pt-0">
+              <button disabled class="w-full bg-slate-200 text-slate-400 font-medium py-2.5 px-4 rounded-xl text-sm cursor-not-allowed">
+                Módulo Bloqueado
+              </button>
+            </div>
+          `;
+        } else {
+          card.className = "bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow";
+          card.innerHTML = `
+            <div>
+              <div class="${mod.colorClass} h-3 w-full"></div>
+              <div class="p-6 space-y-4">
+                <div class="flex justify-between items-start gap-2">
+                  <h3 class="font-bold text-lg text-slate-900">${mod.title}</h3>
+                  ${statusBadge}
+                </div>
+                <p class="text-sm text-slate-600">${mod.description}</p>
+                <div class="space-y-1">
+                  <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Temas clave:</span>
+                  <ul class="text-xs text-slate-600 space-y-1">${topicsHtml}</ul>
+                </div>
+              </div>
+            </div>
+            <div class="p-6 pt-0">
+              <button onclick="openLesson(${id})" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-xl text-sm transition-colors text-center block">
+                ${prog.passed ? 'Repasar Módulo' : 'Entrar al Módulo'}
+              </button>
+            </div>
+          `;
+        }
         grid.appendChild(card);
       }
     }
 
     // ABRIR LECCIÓN
     function openLesson(id) {
+      if (!isModuleUnlocked(id)) {
+        alert("Este módulo se encuentra bloqueado. Debes aprobar el examen anterior.");
+        return;
+      }
       currentModuleId = id;
       const mod = modulesData[id];
 
@@ -369,25 +502,26 @@
 
       for (let id in quizzesData) {
         const quiz = quizzesData[id];
-        const mod = modulesData[id];
-        const prog = userProgress[id] || { completed: false, score: null };
+        const unlocked = isModuleUnlocked(id);
+        const prog = userProgress[id] || { passed: false, score: null };
         const hasQuestions = quiz.questions && quiz.questions.length > 0;
 
         const card = document.createElement('div');
-        card.className = "bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4";
+        card.className = `bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4 ${!unlocked ? 'opacity-60' : ''}`;
         card.innerHTML = `
           <div>
             <div class="flex justify-between items-start gap-2 mb-2">
               <h3 class="font-bold text-slate-900 text-base">${quiz.title}</h3>
-              <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${prog.completed ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}">
-                ${prog.completed ? `Nota: ${prog.score}%` : 'Pendiente'}
+              <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${prog.passed ? 'bg-emerald-100 text-emerald-800' : prog.score !== null ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-600'}">
+                ${prog.score !== null ? `Nota: ${prog.score}%` : 'Pendiente'}
               </span>
             </div>
             <p class="text-xs text-slate-500">${hasQuestions ? `${quiz.questions.length} preguntas de evaluación` : 'Próximamente disponible'}</p>
+            ${!unlocked ? '<p class="text-xs text-amber-600 font-medium mt-1">🔒 Módulo bloqueado.</p>' : ''}
           </div>
           <div>
-            <button onclick="openQuizModal(${id})" ${!hasQuestions ? 'disabled' : ''} class="w-full ${hasQuestions ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-slate-100 text-slate-400 cursor-not-allowed'} font-medium py-2 px-4 rounded-lg text-sm transition-colors">
-              ${prog.completed ? 'Repetir Examen' : 'Realizar Examen'}
+            <button onclick="openQuizModal(${id})" ${!hasQuestions || !unlocked ? 'disabled' : ''} class="w-full ${hasQuestions && unlocked ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-slate-100 text-slate-400 cursor-not-allowed'} font-medium py-2 px-4 rounded-lg text-sm transition-colors">
+              ${prog.score !== null ? 'Repetir Examen' : 'Realizar Examen'}
             </button>
           </div>
         `;
@@ -395,10 +529,70 @@
       }
     }
 
+    // RENDERIZAR APARTADO DE CALIFICACIONES Y ESTADÍSTICAS
+    function renderGradesView() {
+      let totalScore = 0;
+      let evaluatedCount = 0;
+      let passedCount = 0;
+      let unlockedCount = 0;
+
+      const totalModules = Object.keys(modulesData).length;
+      const tbody = document.getElementById('grades-table-body');
+      tbody.innerHTML = '';
+
+      for (let id in modulesData) {
+        const mod = modulesData[id];
+        const quiz = quizzesData[id];
+        const unlocked = isModuleUnlocked(id);
+        if (unlocked) unlockedCount++;
+
+        const prog = userProgress[id] || { passed: false, score: null };
+        if (prog.score !== null) {
+          totalScore += prog.score;
+          evaluatedCount++;
+          if (prog.passed) passedCount++;
+        }
+
+        let statusText = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-500">Sin realizar</span>`;
+        if (prog.passed) {
+          statusText = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">Aprobado</span>`;
+        } else if (prog.score !== null) {
+          statusText = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-rose-100 text-rose-800">Reprobado</span>`;
+        } else if (!unlocked) {
+          statusText = `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700">Bloqueado</span>`;
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/80";
+        tr.innerHTML = `
+          <td class="py-3 px-6 font-medium text-slate-900">Módulo ${id}</td>
+          <td class="py-3 px-6 text-slate-600">${quiz.title}</td>
+          <td class="py-3 px-6 font-bold ${prog.score >= 70 ? 'text-emerald-600' : prog.score !== null ? 'text-rose-600' : 'text-slate-400'}">${prog.score !== null ? prog.score + '%' : '---'}</td>
+          <td class="py-3 px-6">${statusText}</td>
+          <td class="py-3 px-6 text-right">
+            <button onclick="openQuizModal(${id})" ${!unlocked || !quiz.questions.length ? 'disabled' : ''} class="text-xs font-semibold text-blue-600 hover:text-blue-800 ${!unlocked || !quiz.questions.length ? 'opacity-40 cursor-not-allowed' : ''}">
+              ${prog.score !== null ? 'Repetir' : 'Evaluar'}
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      // Actualizar tarjetas de estadística
+      const avg = evaluatedCount > 0 ? Math.round(totalScore / evaluatedCount) : 0;
+      document.getElementById('stats-avg-score').innerText = `${avg}%`;
+      document.getElementById('stats-passed-count').innerText = `${passedCount} / ${totalModules}`;
+      document.getElementById('stats-unlocked-count').innerText = `${unlockedCount} / ${totalModules}`;
+    }
+
     // MODAL DE EXAMEN
     let activeQuizId = null;
 
     function openQuizModal(modId) {
+      if (!isModuleUnlocked(modId)) {
+        alert("Este módulo está bloqueado.");
+        return;
+      }
       activeQuizId = modId;
       const quiz = quizzesData[modId];
       if (!quiz.questions || quiz.questions.length === 0) {
@@ -473,11 +667,18 @@
       }
 
       const score = Math.round((correctCount / quiz.questions.length) * 100);
-      userProgress[activeQuizId] = { completed: true, score: score };
+      const passed = score >= 70;
+
+      userProgress[activeQuizId] = { passed: passed, score: score };
       saveProgress();
 
       document.getElementById('btn-submit-quiz').style.display = 'none';
-      alert(`Examen calificado con éxito. Tu nota: ${score}%`);
+      
+      if (passed) {
+        alert(`¡Felicitaciones! Has aprobado el examen con ${score}%. El siguiente módulo ha sido desbloqueado.`);
+      } else {
+        alert(`Tu nota fue de ${score}%. Se requiere un mínimo de 70% para aprobar y avanzar. ¡Sigue repasando e inténtalo de nuevo!`);
+      }
     }
 
     // Inicializar al cargar la página
