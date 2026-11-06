@@ -4014,5 +4014,3 @@ const quizzesDataL3 = {
     explanation: "El lado de un hexágono regular inscrito es igual al radio del círculo (lado = 6 cm). Perímetro = 6 * 6 = 36 cm."
   }
 ];
-  }
-};
